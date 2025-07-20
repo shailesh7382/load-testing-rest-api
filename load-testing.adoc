@@ -1,0 +1,44 @@
+= Load Testing Strategy for Pricing and Trading REST API
+
+== Objectives
+- Validate system stability, scalability, and performance under expected and peak loads.
+- Identify bottlenecks and ensure SLAs (latency, throughput, error rate) are met.
+- Test both pricing (read-heavy) and trading (write-heavy) endpoints.
+
+== Key Terminologies
+- *Throughput*: Number of requests processed per second (RPS).
+- *Latency*: Time taken to process a request (average, p95, p99).
+- *Concurrency*: Number of simultaneous users or threads.
+- *Error Rate*: Percentage of failed requests.
+- *SLA (Service Level Agreement)*: Performance targets (e.g., 95% of requests < 200ms).
+- *Soak Test*: Long-duration test to check stability.
+- *Spike Test*: Sudden increase in load to test resilience.
+- *Baseline Test*: Establishing current performance metrics.
+
+== Test Scenarios
+- *Baseline Load*: Simulate average daily traffic.
+- *Peak Load*: Simulate maximum expected traffic (e.g., market open/close).
+- *Stress Test*: Increase load until system fails to identify breaking points.
+- *Soak Test*: Run at peak load for several hours to detect memory leaks or degradation.
+- *Spike Test*: Sudden surges in traffic to test auto-scaling and recovery.
+
+== Metrics to Monitor
+- Response time (avg, p95, p99)
+- Throughput (RPS)
+- Error rates (4xx, 5xx)
+- CPU, memory, and network usage
+- Database and external service latencies
+
+== Tools
+- *Load Generation*: JMeter, Gatling, Locust
+- *API Testing*: Rest Assured (for functional/integration tests)
+- *Monitoring*: Prometheus, Grafana, Spring Boot Actuator
+
+== Managing Expectations
+- Define clear SLAs for each endpoint.
+- Communicate test results and bottlenecks to stakeholders.
+- Plan for capacity based on test findings.
+- Document limitations and recommended scaling strategies.
+
+== Continuous Testing
+- Integrate load tests into CI/CD pipelines for early detection of regressions.

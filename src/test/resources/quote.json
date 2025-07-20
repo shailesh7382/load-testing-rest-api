@@ -1,0 +1,28 @@
+{
+  "currencyPair": "EUR/USD",
+  "bid": 1.10,
+  "ask": 1.11,
+  "mid": 1.105,
+  "quoteProvider": "ProviderX",
+  "quoteTime": "2024-06-01T12:34:56",
+  "venue": "VenueA",
+  "liquidityProvider": "LP1",
+  "quoteId": "${quoteId}",
+  "tenor": "SPOT",
+  "settlementType": "T+2",
+  "quoteStatus": "ACTIVE",
+  "sourceSystem": "SystemA",
+  "pricingModel": "Model1",
+  "priceType": "Firm",
+  "marketDataSource": "MarketX",
+  "quoteCondition": "Normal",
+  "quoteOrigin": "Internal",
+  "quoteType": "Indicative",
+  "quoteLevel": "Level1",
+  "quoteSide": "Buy",
+  "quoteChannel": "API",
+  "quoteVersion": "1",
+  "quoteReference": "Ref123",
+  "quoteComment": "Sample quote"
+}
+

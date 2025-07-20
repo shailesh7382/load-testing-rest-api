@@ -1,0 +1,141 @@
+= FX Pricing & Booking REST API
+
+A Spring Boot REST API for pricing (quotes) and booking (trades) of FX trades, supporting a comprehensive set of attributes for both quote and trade entities.
+
+== Features
+
+- Create and retrieve FX Quotes with detailed attributes
+- Book and retrieve FX Trades with extensive trade details
+- In-memory H2 database for easy development and testing
+- JPA/Hibernate for persistence
+- RESTful endpoints for integration and automation
+
+== Getting Started
+
+=== Prerequisites
+
+- Java 11+
+- Maven 3.6+
+
+=== Build & Run
+
+[source,shell]
+----
+mvn clean spring-boot:run
+----
+
+The API will be available at http://localhost:8080.
+
+=== H2 Console
+
+Access the H2 database console at http://localhost:8080/h2-console
+JDBC URL: `jdbc:h2:mem:fxdb`
+User: `sa`
+Password: (leave blank)
+
+== API Endpoints
+
+=== Quotes
+
+- `GET /api/quotes` — List all quotes
+- `GET /api/quotes/{id}` — Get quote by ID
+- `POST /api/quotes` — Create a new quote
+
+Example JSON for creating a quote:
+[source,json]
+----
+{
+  "currencyPair": "EUR/USD",
+  "bid": 1.1234,
+  "ask": 1.1240,
+  "mid": 1.1237,
+  "quoteProvider": "ProviderX",
+  "quoteTime": "2024-06-01T12:34:56",
+  "venue": "VenueA",
+  "liquidityProvider": "LP1",
+  "quoteId": "Q12345",
+  "tenor": "SPOT",
+  "settlementType": "T+2",
+  "quoteStatus": "ACTIVE",
+  "sourceSystem": "SystemA",
+  "pricingModel": "Model1",
+  "priceType": "Firm",
+  "marketDataSource": "MarketX",
+  "quoteCondition": "Normal",
+  "quoteOrigin": "Internal",
+  "quoteType": "Indicative",
+  "quoteLevel": "Level1",
+  "quoteSide": "Buy",
+  "quoteChannel": "API",
+  "quoteVersion": "1",
+  "quoteReference": "Ref123",
+  "quoteComment": "Sample quote"
+}
+----
+
+=== Trades
+
+- `GET /api/trades` — List all trades
+- `GET /api/trades/{id}` — Get trade by ID
+- `POST /api/trades` — Book a new trade
+
+Example JSON for booking a trade:
+[source,json]
+----
+{
+  "tradeId": "T12345",
+  "currencyPair": "EUR/USD",
+  "notional": 1000000,
+  "direction": "BUY",
+  "price": 1.1237,
+  "counterparty": "BankA",
+  "tradeDateTime": "2024-06-01T12:35:00",
+  "trader": "Trader1",
+  "book": "BookA",
+  "status": "CONFIRMED",
+  "settlementType": "T+2",
+  "settlementDate": "2024-06-03",
+  "tradeType": "SPOT",
+  "executionVenue": "VenueA",
+  "sourceSystem": "SystemA",
+  "tradeReference": "RefT123",
+  "tradeComment": "Sample trade",
+  "tradeVersion": "1",
+  "tradeChannel": "API",
+  "tradeStrategy": "Strategy1",
+  "tradeDesk": "Desk1",
+  "tradeOrigin": "Internal",
+  "tradeLevel": "Level1",
+  "tradeSide": "Buy",
+  "tradeCondition": "Normal",
+  "tradeCategory": "Category1",
+  "tradeSubType": "SubTypeA",
+  "tradeBookType": "BookTypeA"
+}
+----
+
+== Testing
+
+Run all tests:
+[source,shell]
+----
+mvn test
+----
+
+== Load Testing
+
+A simple load testing framework is provided using JUnit and Rest Assured.
+
+To run the load tests (ensure the application is running on http://localhost:8080):
+
+[source,shell]
+----
+mvn test -Dtest=com.example.fx.load.LoadTest
+----
+
+This will simulate concurrent quote creation and trade booking using multiple threads, as described in `load-testing.adoc`.
+You can adjust concurrency and request count in `LoadTest.java`.
+
+== License
+
+MIT License.

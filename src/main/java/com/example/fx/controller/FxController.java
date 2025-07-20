@@ -1,41 +1,48 @@
 package com.example.fx.controller;
 
 import com.example.fx.model.Quote;
+import com.example.fx.model.Trade;
 import com.example.fx.repository.QuoteRepository;
+import com.example.fx.repository.TradeRepository;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 @RestController
-@RequestMapping("/api/quotes")
-public class QuoteController {
+@RequestMapping("/api")
+public class FxController {
 
     private final QuoteRepository quoteRepository;
+    private final TradeRepository tradeRepository;
     private final Random random = new Random();
 
-    public QuoteController(QuoteRepository quoteRepository) {
+    public FxController(QuoteRepository quoteRepository, TradeRepository tradeRepository) {
         this.quoteRepository = quoteRepository;
+        this.tradeRepository = tradeRepository;
     }
 
-    @GetMapping
+    // --- Quote endpoints ---
+
+    @GetMapping("/quotes")
     public List<Quote> getAllQuotes() {
         return quoteRepository.findAll();
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/quotes/{id}")
     public Quote getQuoteById(@PathVariable Long id) {
         return quoteRepository.findById(id).orElse(null);
     }
 
-    @PostMapping
+    @PostMapping("/quotes")
     public Quote createQuote(@RequestBody Quote quote) {
         return quoteRepository.save(quote);
     }
 
-    @PostMapping("/rfq")
+    @PostMapping("/quotes/rfq")
     public Quote requestForQuote(@RequestBody Quote rfqRequest) throws InterruptedException {
         // Simulate random delay around 200ms (e.g., 150-250ms)
         Thread.sleep(150 + random.nextInt(100));
@@ -78,5 +85,39 @@ public class QuoteController {
 
         // Save and return the quote
         return quoteRepository.save(quote);
+    }
+
+    // --- Trade endpoints ---
+
+    @GetMapping("/trades")
+    public List<Trade> getAllTrades() {
+        return tradeRepository.findAll();
+    }
+
+    @GetMapping("/trades/{id}")
+    public Trade getTradeById(@PathVariable Long id) {
+        return tradeRepository.findById(id).orElse(null);
+    }
+
+    @PostMapping("/trades")
+    public Object createTrade(@RequestBody Trade trade) {
+        // Validate quoteId exists if provided
+        String quoteId = trade.getQuoteId();
+        if (quoteId != null && !quoteId.isEmpty()) {
+            Optional<Quote> quoteOpt = quoteRepository.findAll().stream()
+                    .filter(q -> quoteId.equals(q.getQuoteId()))
+                    .findFirst();
+            if (!quoteOpt.isPresent()) {
+                return new ErrorResponse("Invalid quoteId: " + quoteId);
+            }
+        }
+        return tradeRepository.save(trade);
+    }
+
+    // Simple error response class
+    static class ErrorResponse {
+        public final String error;
+        public ErrorResponse(String error) { this.error = error; }
+        public String getError() { return error; }
     }
 }
