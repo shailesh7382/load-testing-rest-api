@@ -42,3 +42,39 @@
 
 == Continuous Testing
 - Integrate load tests into CI/CD pipelines for early detection of regressions.
+
+== Reporting sample
+
+===============================================================================================================================================================================
+                                                          LOAD TEST RESULTS SUMMARY
+===============================================================================================================================================================================
+Scenario         | Total Requests  | Duration   | RPS        | Avg Latency    | p90(ms)    | p95(ms)    | p99(ms)    | p99.9(ms)  | p99.99(ms) | Concurrency | Errors     | ErrRate    | SLA
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Baseline Test    | 20              | 2.53       | 7.90       | 250.80         | 161        | 1526       | 1526       | 1526       | 1526       | 2          | 0          | 0.00       | FAIL
+Load Test        | 400             | 5.65       | 70.78      | 138.72         | 274        | 300        | 387        | 403        | 403        | 10         | 0          | 0.00       | FAIL
+Spike Test       | 1000            | 9.90       | 101.04     | 464.07         | 689        | 797        | 1020       | 1084       | 1164       | 50         | 0          | 0.00       | FAIL
+Soak Test        | 7500            | 120.73     | 62.12      | 79.90          | 169        | 173        | 181        | 192        | 217        | 5          | 0          | 0.00       | PASS
+Stress Test      | 4000            | 54.29      | 73.68      | 1293.13        | 1673       | 2282       | 2718       | 3769       | 4076       | 100        | 0          | 0.00       | FAIL
+===============================================================================================================================================================================
+
+Legend:
+  Scenario        : Name of the test scenario (Baseline, Load, Spike, Soak, Stress)
+  Total Requests  : Total number of HTTP requests sent during the scenario
+  Duration        : Total duration of the scenario in seconds
+  RPS             : Requests per second (throughput)
+  Avg Latency     : Average response time in milliseconds
+  p90(ms)         : 90th percentile latency (90% of requests were faster than this)
+  p95(ms)         : 95th percentile latency (95% of requests were faster than this)
+  p99(ms)         : 99th percentile latency (99% of requests were faster than this)
+  p99.9(ms)       : 99.9th percentile latency (99.9% of requests were faster than this)
+  p99.99(ms)      : 99.99th percentile latency (99.99% of requests were faster than this)
+  Concurrency     : Number of concurrent threads/users used in the scenario
+  Errors          : Number of failed requests (non-2xx status)
+  ErrRate         : Error rate as a percentage
+  SLA             : PASS if error rate <= 1%, p95 latency <= 250ms, RPS >= 50; otherwise FAIL
+
+Interpretation:
+  - Lower latency and higher RPS indicate better performance.
+  - p90, p95, p99, p99.9, and p99.99 latencies help identify outliers and worst-case response times.
+  - Use Baseline to establish a reference, Load for expected traffic, Spike for sudden surges, Soak for long-term stability, and Stress to find breaking points.
+  - SLA is considered PASS if error rate <= 1%, p95 latency <= 250ms, and RPS >= 50.
