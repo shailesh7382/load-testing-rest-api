@@ -2,6 +2,7 @@ package com.example.fx.load;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.junit.jupiter.api.*;
 
 import java.io.IOException;
@@ -10,6 +11,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 
 /**
  * LoadTest is a comprehensive JUnit-based load testing framework for the FX Pricing & Booking REST API.
@@ -181,7 +186,7 @@ public class LoadTest {
 
     /**
      * Runs a load test scenario with the given concurrency and requests per thread.
-     * Each thread sends quote and trade requests in sequence.
+     * Each thread sends quote and trade requests in sequence using Apache HttpClient 5.x.
      *
      * @param testName Name of the scenario
      * @param threads Number of concurrent threads
@@ -197,40 +202,33 @@ public class LoadTest {
 
         long testStart = System.nanoTime();
 
-        // Each thread executes requestsPerThread quote+trade requests
         for (int i = 0; i < threads; i++) {
             futures.add(executor.submit(() -> {
-                for (int j = 0; j < requestsPerThread; j++) {
-                    String quoteId = "Q" + ThreadLocalRandom.current().nextInt(100000, 999999);
-                    String tradeId = "T" + ThreadLocalRandom.current().nextInt(100000, 999999);
+                try (CloseableHttpClient client = HttpClients.createDefault()) {
+                    for (int j = 0; j < requestsPerThread; j++) {
+                        String quoteId = "Q" + ThreadLocalRandom.current().nextInt(100000, 999999);
+                        String tradeId = "T" + ThreadLocalRandom.current().nextInt(100000, 999999);
 
-                    // Send quote request
-                    String quoteJson = quoteJsonTemplate.replace("${quoteId}", quoteId);
-                    long start = System.nanoTime();
-                    int status1 = RestAssured.given()
-                            .contentType(ContentType.JSON)
-                            .body(quoteJson)
-                            .post("/quotes")
-                            .then()
-                            .extract().statusCode();
-                    long end = System.nanoTime();
-                    latencies.add((end - start) / 1_000_000); // ms
-                    if (status1 < 200 || status1 >= 300) errorCount.incrementAndGet();
+                        // Send quote request
+                        String quoteJson = quoteJsonTemplate.replace("${quoteId}", quoteId);
+                        long start = System.nanoTime();
+                        int status1 = doPost(client, BASE_URL + "/quotes", quoteJson);
+                        long end = System.nanoTime();
+                        latencies.add((end - start) / 1_000_000); // ms
+                        if (status1 < 200 || status1 >= 300) errorCount.incrementAndGet();
 
-                    // Send trade request referencing the quote
-                    String tradeJson = tradeJsonTemplate
-                            .replace("${tradeId}", tradeId)
-                            .replace("${quoteId}", quoteId);
-                    start = System.nanoTime();
-                    int status2 = RestAssured.given()
-                            .contentType(ContentType.JSON)
-                            .body(tradeJson)
-                            .post("/trades")
-                            .then()
-                            .extract().statusCode();
-                    end = System.nanoTime();
-                    latencies.add((end - start) / 1_000_000); // ms
-                    if (status2 < 200 || status2 >= 300) errorCount.incrementAndGet();
+                        // Send trade request referencing the quote
+                        String tradeJson = tradeJsonTemplate
+                                .replace("${tradeId}", tradeId)
+                                .replace("${quoteId}", quoteId);
+                        start = System.nanoTime();
+                        int status2 = doPost(client, BASE_URL + "/trades", tradeJson);
+                        end = System.nanoTime();
+                        latencies.add((end - start) / 1_000_000); // ms
+                        if (status2 < 200 || status2 >= 300) errorCount.incrementAndGet();
+                    }
+                } catch (Exception e) {
+                    errorCount.incrementAndGet();
                 }
             }));
         }
@@ -269,7 +267,7 @@ public class LoadTest {
     }
 
     /**
-     * Runs a soak test scenario for a fixed duration, repeatedly sending quote and trade requests.
+     * Runs a soak test scenario for a fixed duration, repeatedly sending quote and trade requests using Apache HttpClient 5.x.
      *
      * @param testName Name of the scenario
      * @param threads Number of concurrent threads
@@ -286,44 +284,37 @@ public class LoadTest {
         long testStart = System.nanoTime();
         long endTime = System.currentTimeMillis() + durationSeconds * 1000L;
 
-        // Each thread loops until the soak duration is reached
         for (int i = 0; i < threads; i++) {
             futures.add(executor.submit(() -> {
                 int localCount = 0;
-                while (System.currentTimeMillis() < endTime) {
-                    for (int j = 0; j < requestsPerThread; j++) {
-                        String quoteId = "Q" + ThreadLocalRandom.current().nextInt(100000, 999999);
-                        String tradeId = "T" + ThreadLocalRandom.current().nextInt(100000, 999999);
+                try (CloseableHttpClient client = HttpClients.createDefault()) {
+                    while (System.currentTimeMillis() < endTime) {
+                        for (int j = 0; j < requestsPerThread; j++) {
+                            String quoteId = "Q" + ThreadLocalRandom.current().nextInt(100000, 999999);
+                            String tradeId = "T" + ThreadLocalRandom.current().nextInt(100000, 999999);
 
-                        // Send quote request
-                        String quoteJson = quoteJsonTemplate.replace("${quoteId}", quoteId);
-                        long start = System.nanoTime();
-                        int status1 = RestAssured.given()
-                                .contentType(ContentType.JSON)
-                                .body(quoteJson)
-                                .post("/quotes")
-                                .then()
-                                .extract().statusCode();
-                        long end = System.nanoTime();
-                        latencies.add((end - start) / 1_000_000); // ms
-                        if (status1 < 200 || status1 >= 300) errorCount.incrementAndGet();
+                            // Send quote request
+                            String quoteJson = quoteJsonTemplate.replace("${quoteId}", quoteId);
+                            long start = System.nanoTime();
+                            int status1 = doPost(client, BASE_URL + "/quotes", quoteJson);
+                            long end = System.nanoTime();
+                            latencies.add((end - start) / 1_000_000); // ms
+                            if (status1 < 200 || status1 >= 300) errorCount.incrementAndGet();
 
-                        // Send trade request referencing the quote
-                        String tradeJson = tradeJsonTemplate
-                                .replace("${tradeId}", tradeId)
-                                .replace("${quoteId}", quoteId);
-                        start = System.nanoTime();
-                        int status2 = RestAssured.given()
-                                .contentType(ContentType.JSON)
-                                .body(tradeJson)
-                                .post("/trades")
-                                .then()
-                                .extract().statusCode();
-                        end = System.nanoTime();
-                        latencies.add((end - start) / 1_000_000); // ms
-                        if (status2 < 200 || status2 >= 300) errorCount.incrementAndGet();
-                        localCount += 2;
+                            // Send trade request referencing the quote
+                            String tradeJson = tradeJsonTemplate
+                                    .replace("${tradeId}", tradeId)
+                                    .replace("${quoteId}", quoteId);
+                            start = System.nanoTime();
+                            int status2 = doPost(client, BASE_URL + "/trades", tradeJson);
+                            end = System.nanoTime();
+                            latencies.add((end - start) / 1_000_000); // ms
+                            if (status2 < 200 || status2 >= 300) errorCount.incrementAndGet();
+                            localCount += 2;
+                        }
                     }
+                } catch (Exception e) {
+                    errorCount.incrementAndGet();
                 }
                 return localCount;
             }));
@@ -425,6 +416,22 @@ public class LoadTest {
         System.out.println("  - Use Baseline to establish a reference, Load for expected traffic, Spike for sudden surges, Soak for long-term stability, and Stress to find breaking points.");
         System.out.println("  - SLA is considered PASS if error rate <= 1%, p95 latency <= 250ms, and RPS >= 50.");
         System.out.println();
+    }
+
+    /**
+     * Helper method to POST JSON using Apache HttpClient 5.x and return HTTP status code.
+     */
+    private int doPost(CloseableHttpClient client, String url, String json) {
+        try {
+            HttpPost post = new HttpPost(url);
+            post.setHeader("Content-Type", "application/json");
+            post.setEntity(new StringEntity(json));
+            try (ClassicHttpResponse response = client.executeOpen(null, post, null)) {
+                return response.getCode();
+            }
+        } catch (Exception e) {
+            return 0;
+        }
     }
 
     // =========================
