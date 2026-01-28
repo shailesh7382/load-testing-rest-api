@@ -83,7 +83,7 @@ public class LoadTest {
     void setup() throws IOException {
         setCpuAffinity();
         Properties props = new Properties();
-        try (InputStream in = getClass().getClassLoader().getResourceAsStream("loadtest.properties")) {
+        try (InputStream in = getClass().getClassLoader().getResourceAsStream("loadtest_low.properties")) {
             props.load(in);
         }
         BASE_URL = props.getProperty("baseUrl", "http://localhost:8080/api");
