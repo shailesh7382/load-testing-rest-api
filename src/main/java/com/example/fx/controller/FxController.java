@@ -6,8 +6,6 @@ import com.example.fx.repository.QuoteRepository;
 import com.example.fx.repository.TradeRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -43,9 +41,8 @@ public class FxController {
     }
 
     @Operation(summary = "Get quote by ID", description = "Retrieves a specific quote by its database ID")
-    @Parameter(name = "id", description = "Quote database ID", required = true)
     @GetMapping("/quotes/{id}")
-    public Quote getQuoteById(@PathVariable Long id) {
+    public Quote getQuoteById(@Parameter(name = "id", description = "Quote database ID", required = true) @PathVariable Long id) {
         return quoteRepository.findById(id).orElse(null);
     }
 
