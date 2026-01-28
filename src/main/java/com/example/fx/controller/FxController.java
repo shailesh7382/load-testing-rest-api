@@ -42,6 +42,55 @@ public class FxController {
         return quoteRepository.save(quote);
     }
 
+    @PutMapping("/quotes/{id}")
+    public Quote updateQuote(@PathVariable Long id, @RequestBody Quote quote) {
+        if (quote == null) {
+            return null;
+        }
+        Quote existing = quoteRepository.findById(id).orElse(null);
+        if (existing == null) {
+            return null;
+        }
+        quote.setId(id);
+        return quoteRepository.save(quote);
+    }
+
+    @DeleteMapping("/quotes/{id}")
+    public void deleteQuote(@PathVariable Long id) {
+        if (quoteRepository.existsById(id)) {
+            quoteRepository.deleteById(id);
+        }
+    }
+
+    @GetMapping("/quotes/currency/{currencyPair}")
+    public List<Quote> getQuotesByCurrencyPair(@PathVariable String currencyPair) {
+        // URL decode the currency pair to handle slashes
+        return quoteRepository.findAll().stream()
+                .filter(q -> currencyPair.equals(q.getCurrencyPair()))
+                .toList();
+    }
+
+    @GetMapping("/quotes/search")
+    public List<Quote> searchQuotes(@RequestParam(required = false) String currencyPair,
+                                     @RequestParam(required = false) String status) {
+        return quoteRepository.findAll().stream()
+                .filter(q -> currencyPair == null || currencyPair.equals(q.getCurrencyPair()))
+                .filter(q -> status == null || status.equals(q.getQuoteStatus()))
+                .toList();
+    }
+
+    @GetMapping("/quotes/status/{status}")
+    public List<Quote> getQuotesByStatus(@PathVariable String status) {
+        return quoteRepository.findAll().stream()
+                .filter(q -> status.equals(q.getQuoteStatus()))
+                .toList();
+    }
+
+    @GetMapping("/quotes/count")
+    public long getQuoteCount() {
+        return quoteRepository.count();
+    }
+
     @PostMapping("/quotes/rfq")
     public Quote requestForQuote(@RequestBody Quote rfqRequest) throws InterruptedException {
         // Simulate random delay around 200ms (e.g., 150-250ms)
@@ -112,6 +161,64 @@ public class FxController {
             }
         }
         return tradeRepository.save(trade);
+    }
+
+    @PutMapping("/trades/{id}")
+    public Trade updateTrade(@PathVariable Long id, @RequestBody Trade trade) {
+        if (trade == null) {
+            return null;
+        }
+        Trade existing = tradeRepository.findById(id).orElse(null);
+        if (existing == null) {
+            return null;
+        }
+        trade.setId(id);
+        return tradeRepository.save(trade);
+    }
+
+    @DeleteMapping("/trades/{id}")
+    public void deleteTrade(@PathVariable Long id) {
+        if (tradeRepository.existsById(id)) {
+            tradeRepository.deleteById(id);
+        }
+    }
+
+    @GetMapping("/trades/currency/{currencyPair}")
+    public List<Trade> getTradesByCurrencyPair(@PathVariable String currencyPair) {
+        // URL decode the currency pair to handle slashes
+        return tradeRepository.findAll().stream()
+                .filter(t -> currencyPair.equals(t.getCurrencyPair()))
+                .toList();
+    }
+
+    @GetMapping("/trades/search")
+    public List<Trade> searchTrades(@RequestParam(required = false) String currencyPair,
+                                     @RequestParam(required = false) String status) {
+        return tradeRepository.findAll().stream()
+                .filter(t -> currencyPair == null || currencyPair.equals(t.getCurrencyPair()))
+                .filter(t -> status == null || status.equals(t.getStatus()))
+                .toList();
+    }
+
+    @GetMapping("/trades/status/{status}")
+    public List<Trade> getTradesByStatus(@PathVariable String status) {
+        return tradeRepository.findAll().stream()
+                .filter(t -> status.equals(t.getStatus()))
+                .toList();
+    }
+
+    @GetMapping("/trades/count")
+    public long getTradeCount() {
+        return tradeRepository.count();
+    }
+
+    @GetMapping("/trades/volume/{currencyPair}")
+    public BigDecimal getTradeVolumeByCurrencyPair(@PathVariable String currencyPair) {
+        return tradeRepository.findAll().stream()
+                .filter(t -> currencyPair.equals(t.getCurrencyPair()))
+                .map(Trade::getNotional)
+                .filter(notional -> notional != null)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     // Simple error response class
