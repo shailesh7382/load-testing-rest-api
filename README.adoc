@@ -12,6 +12,26 @@ A Spring Boot REST API for pricing (quotes) and booking (trades) of FX trades, s
 - Comprehensive OpenAPI 3.0 specification for API documentation
 - Interactive Swagger UI for API exploration and testing
 
+== Project Structure
+
+This project uses a multi-module Maven structure:
+
+- **Parent POM** (root): Defines common properties and modules
+- **fx-api**: Contains the FX Pricing & Booking REST API implementation
+
+=== Module Overview
+
+[source]
+----
+load-testing-rest-api/          # Parent POM
+├── pom.xml                     # Parent POM file
+└── fx-api/                     # API implementation module
+    ├── pom.xml                 # Module POM file
+    ├── src/                    # Source code
+    ├── openapi.yaml            # OpenAPI specification
+    └── load-testing.adoc       # Load testing documentation
+----
+
 == Getting Started
 
 === Prerequisites
@@ -21,9 +41,26 @@ A Spring Boot REST API for pricing (quotes) and booking (trades) of FX trades, s
 
 === Build & Run
 
+To build all modules:
+
 [source,shell]
 ----
-mvn clean spring-boot:run
+mvn clean install
+----
+
+To run the fx-api module:
+
+[source,shell]
+----
+cd fx-api
+mvn spring-boot:run
+----
+
+Or from the root directory:
+
+[source,shell]
+----
+mvn spring-boot:run -pl fx-api
 ----
 
 The API will be available at http://localhost:8080.
@@ -54,12 +91,12 @@ Swagger UI provides:
 The complete OpenAPI 3.0 specification is also available:
 
 - **API Docs JSON**: http://localhost:8080/v3/api-docs
-- **Static YAML file**: `openapi.yaml` at the root of the repository
+- **Static YAML file**: `fx-api/openapi.yaml` in the repository
 
 You can also view the static specification using external tools:
 
-- **Swagger Editor**: https://editor.swagger.io/ (paste the content of `openapi.yaml`)
-- **Redoc**: https://redocly.github.io/redoc/ (load `openapi.yaml`)
+- **Swagger Editor**: https://editor.swagger.io/ (paste the content of `fx-api/openapi.yaml`)
+- **Redoc**: https://redocly.github.io/redoc/ (load `fx-api/openapi.yaml`)
 
 The specification includes:
 
@@ -172,9 +209,16 @@ Example JSON for booking a trade:
 
 == Testing
 
-Run all tests:
+Run all tests from the root directory:
 [source,shell]
 ----
+mvn test
+----
+
+Or run tests for a specific module:
+[source,shell]
+----
+cd fx-api
 mvn test
 ----
 
@@ -186,10 +230,17 @@ To run the load tests (ensure the application is running on http://localhost:808
 
 [source,shell]
 ----
+mvn test -Dtest=com.example.fx.load.LoadTest -pl fx-api
+----
+
+Or from within the fx-api directory:
+[source,shell]
+----
+cd fx-api
 mvn test -Dtest=com.example.fx.load.LoadTest
 ----
 
-This will simulate concurrent quote creation and trade booking using multiple threads, as described in `load-testing.adoc`.
+This will simulate concurrent quote creation and trade booking using multiple threads, as described in `fx-api/load-testing.adoc`.
 You can adjust concurrency and request count in `LoadTest.java`.
 
 == License
