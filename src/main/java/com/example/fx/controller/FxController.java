@@ -4,6 +4,13 @@ import com.example.fx.model.Quote;
 import com.example.fx.model.Trade;
 import com.example.fx.repository.QuoteRepository;
 import com.example.fx.repository.TradeRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -14,6 +21,7 @@ import java.util.Random;
 
 @RestController
 @RequestMapping("/api")
+@Tag(name = "FX Trading", description = "APIs for FX quotes and trades management")
 public class FxController {
 
     private final QuoteRepository quoteRepository;
@@ -27,16 +35,22 @@ public class FxController {
 
     // --- Quote endpoints ---
 
+    @Operation(summary = "Get all quotes", description = "Retrieves a list of all quotes in the system")
+    @ApiResponse(responseCode = "200", description = "Successful operation")
     @GetMapping("/quotes")
     public List<Quote> getAllQuotes() {
         return quoteRepository.findAll();
     }
 
+    @Operation(summary = "Get quote by ID", description = "Retrieves a specific quote by its database ID")
+    @Parameter(name = "id", description = "Quote database ID", required = true)
     @GetMapping("/quotes/{id}")
     public Quote getQuoteById(@PathVariable Long id) {
         return quoteRepository.findById(id).orElse(null);
     }
 
+    @Operation(summary = "Create a new quote", description = "Creates a new FX quote")
+    @ApiResponse(responseCode = "200", description = "Quote created successfully")
     @PostMapping("/quotes")
     public Quote createQuote(@RequestBody Quote quote) {
         return quoteRepository.save(quote);
@@ -91,6 +105,8 @@ public class FxController {
         return quoteRepository.count();
     }
 
+    @Operation(summary = "Request for Quote (RFQ)", description = "Submit a request for quote with simulated pricing. Simulates a delay of approximately 200ms (150-249ms).")
+    @ApiResponse(responseCode = "200", description = "Quote generated successfully")
     @PostMapping("/quotes/rfq")
     public Quote requestForQuote(@RequestBody Quote rfqRequest) throws InterruptedException {
         // Simulate random delay around 200ms (e.g., 150-250ms)
@@ -138,6 +154,8 @@ public class FxController {
 
     // --- Trade endpoints ---
 
+    @Operation(summary = "Get all trades", description = "Retrieves a list of all trades in the system")
+    @ApiResponse(responseCode = "200", description = "Successful operation")
     @GetMapping("/trades")
     public List<Trade> getAllTrades() {
         return tradeRepository.findAll();
@@ -148,6 +166,10 @@ public class FxController {
         return tradeRepository.findById(id).orElse(null);
     }
 
+    @Operation(summary = "Book a new trade", description = "Creates a new FX trade. Validates quoteId if provided.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Trade created successfully or error response if validation fails")
+    })
     @PostMapping("/trades")
     public Object createTrade(@RequestBody Trade trade) {
         // Validate quoteId exists if provided

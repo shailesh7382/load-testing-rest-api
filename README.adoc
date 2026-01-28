@@ -10,6 +10,7 @@ A Spring Boot REST API for pricing (quotes) and booking (trades) of FX trades, s
 - JPA/Hibernate for persistence
 - RESTful endpoints for integration and automation
 - Comprehensive OpenAPI 3.0 specification for API documentation
+- Interactive Swagger UI for API exploration and testing
 
 == Getting Started
 
@@ -29,12 +30,35 @@ The API will be available at http://localhost:8080.
 
 === API Documentation
 
-The complete OpenAPI 3.0 specification is available in `openapi.yaml` at the root of the repository.
+The application includes **Swagger UI** for interactive API documentation and testing.
 
-You can view and interact with the API documentation using:
+==== Swagger UI
+
+Once the application is running, access Swagger UI at:
+
+[source]
+----
+http://localhost:8080/swagger-ui.html
+----
+
+Swagger UI provides:
+
+- Interactive API documentation with all endpoints
+- Try-it-out functionality to test APIs directly from the browser
+- Complete request/response schemas
+- Example payloads for all operations
+- Automatic API documentation generated from code annotations
+
+==== OpenAPI Specification
+
+The complete OpenAPI 3.0 specification is also available:
+
+- **API Docs JSON**: http://localhost:8080/v3/api-docs
+- **Static YAML file**: `openapi.yaml` at the root of the repository
+
+You can also view the static specification using external tools:
 
 - **Swagger Editor**: https://editor.swagger.io/ (paste the content of `openapi.yaml`)
-- **Swagger UI**: Can be integrated into the application (see below)
 - **Redoc**: https://redocly.github.io/redoc/ (load `openapi.yaml`)
 
 The specification includes:
