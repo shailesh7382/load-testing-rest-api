@@ -120,11 +120,13 @@ public class QuoteApiContractTest {
         .then()
             .statusCode(200);
 
-        // Retrieve quotes by currency pair
+        // Retrieve quotes by currency pair using search endpoint
+        // Note: Using search endpoint instead of path parameter due to URL encoding limitations with slashes
         given()
             .accept(ContentType.JSON)
+            .queryParam("currencyPair", "USD/JPY")
         .when()
-            .get("/api/quotes/currency/{currencyPair}", "USD/JPY")
+            .get("/api/quotes/search")
         .then()
             .statusCode(200)
             .body("$", hasSize(greaterThanOrEqualTo(1)))

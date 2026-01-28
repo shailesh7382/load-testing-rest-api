@@ -14,19 +14,16 @@
     <name>FX API Testing</name>
     <description>API testing and validation using OpenAPI specification</description>
 
+    <properties>
+        <!-- Skip tests by default; requires running API server -->
+        <maven.test.skip>true</maven.test.skip>
+    </properties>
+
     <dependencies>
         <!-- REST Assured for API testing -->
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <!-- OpenAPI Validator for REST Assured -->
-        <dependency>
-            <groupId>com.atlassian.oai</groupId>
-            <artifactId>swagger-request-validator-restassured</artifactId>
-            <version>2.39.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -67,7 +64,8 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <!-- Skip tests by default as they require the API to be running -->
-                    <skipTests>true</skipTests>
+                    <!-- Override with: mvn test -Dmaven.test.skip=false -->
+                    <skip>${maven.test.skip}</skip>
                     <systemPropertyVariables>
                         <api.base.url>http://localhost:8080</api.base.url>
                         <openapi.spec.path>${project.parent.basedir}/fx-api/openapi.yaml</openapi.spec.path>

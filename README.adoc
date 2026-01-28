@@ -18,6 +18,9 @@ This project uses a multi-module Maven structure:
 
 - **Parent POM** (root): Defines common properties and modules
 - **fx-api**: Contains the FX Pricing & Booking REST API implementation
+- **fx-api-client**: Client-side code generation from OpenAPI specification
+- **fx-api-server-stub**: Server-side stub generation from OpenAPI specification
+- **fx-api-test**: API testing and validation using OpenAPI specification
 
 === Module Overview
 
@@ -25,11 +28,21 @@ This project uses a multi-module Maven structure:
 ----
 load-testing-rest-api/          # Parent POM
 ├── pom.xml                     # Parent POM file
-└── fx-api/                     # API implementation module
+├── fx-api/                     # API implementation module
+│   ├── pom.xml                 # Module POM file
+│   ├── src/                    # Source code
+│   ├── openapi.yaml            # OpenAPI specification
+│   └── load-testing.adoc       # Load testing documentation
+├── fx-api-client/              # Client code generation module
+│   ├── pom.xml                 # Module POM file
+│   └── README.md               # Client documentation
+├── fx-api-server-stub/         # Server stub generation module
+│   ├── pom.xml                 # Module POM file
+│   └── README.md               # Server stub documentation
+└── fx-api-test/                # API testing module
     ├── pom.xml                 # Module POM file
-    ├── src/                    # Source code
-    ├── openapi.yaml            # OpenAPI specification
-    └── load-testing.adoc       # Load testing documentation
+    ├── src/test/               # Test source code
+    └── README.md               # Testing documentation
 ----
 
 == Getting Started
@@ -242,6 +255,69 @@ mvn test -Dtest=com.example.fx.load.LoadTest
 
 This will simulate concurrent quote creation and trade booking using multiple threads, as described in `fx-api/load-testing.adoc`.
 You can adjust concurrency and request count in `LoadTest.java`.
+
+== OpenAPI Code Generation Modules
+
+The project includes three additional modules that leverage the OpenAPI specification for code generation and testing.
+
+=== fx-api-client: Client SDK Generation
+
+Generates a Java client SDK from the OpenAPI specification.
+
+**Building the client:**
+[source,shell]
+----
+mvn clean compile -pl fx-api-client
+----
+
+**Usage example:**
+[source,java]
+----
+import com.example.fx.client.ApiClient;
+import com.example.fx.client.api.QuotesApi;
+
+ApiClient apiClient = new ApiClient();
+apiClient.setBasePath("http://localhost:8080");
+QuotesApi quotesApi = new QuotesApi(apiClient);
+----
+
+See `fx-api-client/README.md` for detailed documentation and usage examples.
+
+=== fx-api-server-stub: Server Stub Generation
+
+Generates Spring Boot server stubs (interfaces) from the OpenAPI specification.
+
+**Building the stubs:**
+[source,shell]
+----
+mvn clean compile -pl fx-api-server-stub
+----
+
+**Usage:** Implement the generated interfaces in your Spring Boot application to ensure API contract compliance.
+
+See `fx-api-server-stub/README.md` for detailed documentation and usage examples.
+
+=== fx-api-test: API Contract Testing
+
+Provides comprehensive API testing and validation using the OpenAPI specification.
+
+**Running the tests** (requires the API to be running on http://localhost:8080):
+[source,shell]
+----
+# Start the API server in one terminal
+mvn spring-boot:run -pl fx-api
+
+# Run the tests in another terminal
+mvn test -Dmaven.test.skip=false -pl fx-api-test
+----
+
+**Test coverage includes:**
+
+- Contract tests for all Quote API endpoints
+- Contract tests for all Trade API endpoints
+- Basic endpoint validation tests
+
+See `fx-api-test/README.md` for detailed documentation and test descriptions.
 
 == License
 

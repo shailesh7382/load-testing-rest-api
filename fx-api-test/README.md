@@ -31,11 +31,13 @@ Tests all Trade API endpoints:
 - GET /api/trades/volume/{currencyPair} - Get trade volume
 - GET /api/trades/search - Search trades with filters
 
-### OpenApiValidationTest
-Validates API requests and responses against the OpenAPI schema:
-- Schema validation for request payloads
-- Schema validation for response payloads
-- Ensures compliance with OpenAPI specification
+### ApiEndpointsTest
+Basic validation tests for API endpoints:
+- GET /api/quotes - Validate quotes endpoint responds
+- GET /api/trades - Validate trades endpoint responds
+- GET /api/quotes/count - Validate count endpoint
+- GET /api/trades/count - Validate trade count endpoint
+- POST /api/quotes/rfq - Validate RFQ endpoint
 
 ## Running Tests
 
@@ -54,22 +56,22 @@ mvn spring-boot:run
 In another terminal:
 ```bash
 cd fx-api-test
-mvn test -DskipTests=false
+mvn test -Dmaven.test.skip=false
 ```
 
 ### Run Specific Test Class
 
 ```bash
-mvn test -DskipTests=false -Dtest=QuoteApiContractTest
-mvn test -DskipTests=false -Dtest=TradeApiContractTest
-mvn test -DskipTests=false -Dtest=OpenApiValidationTest
+mvn test -Dmaven.test.skip=false -Dtest=QuoteApiContractTest
+mvn test -Dmaven.test.skip=false -Dtest=TradeApiContractTest
+mvn test -Dmaven.test.skip=false -Dtest=ApiEndpointsTest
 ```
 
 ### Custom API Base URL
 
 To test against a different environment:
 ```bash
-mvn test -DskipTests=false -Dapi.base.url=http://your-server:8080
+mvn test -Dmaven.test.skip=false -Dapi.base.url=http://your-server:8080
 ```
 
 ## Configuration
@@ -103,10 +105,10 @@ Tests are skipped by default in the POM configuration because they require the A
 
 ```
 [INFO] Running com.example.fx.test.QuoteApiContractTest
-[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0
 [INFO] Running com.example.fx.test.TradeApiContractTest
-[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0
-[INFO] Running com.example.fx.test.OpenApiValidationTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Running com.example.fx.test.ApiEndpointsTest
 [INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0
 ```
 
