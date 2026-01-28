@@ -44,6 +44,9 @@ public class FxController {
 
     @PutMapping("/quotes/{id}")
     public Quote updateQuote(@PathVariable Long id, @RequestBody Quote quote) {
+        if (quote == null) {
+            return null;
+        }
         Quote existing = quoteRepository.findById(id).orElse(null);
         if (existing == null) {
             return null;
@@ -54,7 +57,9 @@ public class FxController {
 
     @DeleteMapping("/quotes/{id}")
     public void deleteQuote(@PathVariable Long id) {
-        quoteRepository.deleteById(id);
+        if (quoteRepository.existsById(id)) {
+            quoteRepository.deleteById(id);
+        }
     }
 
     @GetMapping("/quotes/currency/{currencyPair}")
@@ -160,6 +165,9 @@ public class FxController {
 
     @PutMapping("/trades/{id}")
     public Trade updateTrade(@PathVariable Long id, @RequestBody Trade trade) {
+        if (trade == null) {
+            return null;
+        }
         Trade existing = tradeRepository.findById(id).orElse(null);
         if (existing == null) {
             return null;
@@ -170,7 +178,9 @@ public class FxController {
 
     @DeleteMapping("/trades/{id}")
     public void deleteTrade(@PathVariable Long id) {
-        tradeRepository.deleteById(id);
+        if (tradeRepository.existsById(id)) {
+            tradeRepository.deleteById(id);
+        }
     }
 
     @GetMapping("/trades/currency/{currencyPair}")
