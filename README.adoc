@@ -9,6 +9,7 @@ A Spring Boot REST API for pricing (quotes) and booking (trades) of FX trades, s
 - In-memory H2 database for easy development and testing
 - JPA/Hibernate for persistence
 - RESTful endpoints for integration and automation
+- Comprehensive OpenAPI 3.0 specification for API documentation
 
 == Getting Started
 
@@ -25,6 +26,23 @@ mvn clean spring-boot:run
 ----
 
 The API will be available at http://localhost:8080.
+
+=== API Documentation
+
+The complete OpenAPI 3.0 specification is available in `openapi.yaml` at the root of the repository.
+
+You can view and interact with the API documentation using:
+
+- **Swagger Editor**: https://editor.swagger.io/ (paste the content of `openapi.yaml`)
+- **Swagger UI**: Can be integrated into the application (see below)
+- **Redoc**: https://redocly.github.io/redoc/ (load `openapi.yaml`)
+
+The specification includes:
+
+- All Quote and Trade endpoints with detailed descriptions
+- Complete request/response schemas
+- Example requests and responses
+- Parameter descriptions and validation rules
 
 === H2 Console
 
