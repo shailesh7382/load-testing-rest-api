@@ -103,13 +103,11 @@ paths:
             format: int64
       responses:
         '200':
-          description: Successful operation
+          description: Successful operation (returns null if quote not found)
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Quote'
-        '404':
-          description: Quote not found
     put:
       tags:
         - Quotes
@@ -132,13 +130,11 @@ paths:
               $ref: '#/components/schemas/QuoteInput'
       responses:
         '200':
-          description: Quote updated successfully
+          description: Quote updated successfully (returns null if quote not found)
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Quote'
-        '404':
-          description: Quote not found
     delete:
       tags:
         - Quotes
@@ -155,9 +151,7 @@ paths:
             format: int64
       responses:
         '204':
-          description: Quote deleted successfully
-        '404':
-          description: Quote not found
+          description: Quote deleted successfully (or silently ignored if not found)
 
   /api/quotes/currency/{currencyPair}:
     get:
@@ -266,7 +260,7 @@ paths:
       description: |
         Submit a request for quote with simulated pricing. 
         The system will generate a randomized quote based on the request.
-        Simulates a delay of approximately 200ms (150-250ms).
+        Simulates a delay of approximately 200ms (150-249ms).
       operationId: requestForQuote
       requestBody:
         required: true
@@ -351,19 +345,13 @@ paths:
                   quoteId: Q12345
       responses:
         '200':
-          description: Trade created successfully
+          description: Trade created successfully, or error response if validation fails
           content:
             application/json:
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/Trade'
                   - $ref: '#/components/schemas/ErrorResponse'
-        '400':
-          description: Invalid quoteId
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
 
   /api/trades/{id}:
     get:
@@ -382,13 +370,11 @@ paths:
             format: int64
       responses:
         '200':
-          description: Successful operation
+          description: Successful operation (returns null if trade not found)
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Trade'
-        '404':
-          description: Trade not found
     put:
       tags:
         - Trades
@@ -411,13 +397,11 @@ paths:
               $ref: '#/components/schemas/TradeInput'
       responses:
         '200':
-          description: Trade updated successfully
+          description: Trade updated successfully (returns null if trade not found)
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Trade'
-        '404':
-          description: Trade not found
     delete:
       tags:
         - Trades
@@ -434,9 +418,7 @@ paths:
             format: int64
       responses:
         '204':
-          description: Trade deleted successfully
-        '404':
-          description: Trade not found
+          description: Trade deleted successfully (or silently ignored if not found)
 
   /api/trades/currency/{currencyPair}:
     get:
@@ -831,6 +813,7 @@ components:
           example: T+2
         settlementDate:
           type: string
+          format: date
           description: Settlement date
           example: "2024-06-03"
         tradeType:
@@ -943,6 +926,7 @@ components:
           example: T+2
         settlementDate:
           type: string
+          format: date
           example: "2024-06-03"
         tradeType:
           type: string
