@@ -18,11 +18,15 @@
 
     <modules>
         <module>fx-api</module>
+        <module>fx-api-client</module>
+        <module>fx-api-server-stub</module>
+        <module>fx-api-test</module>
     </modules>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <openapi-generator-version>7.2.0</openapi-generator-version>
     </properties>
 </project>
