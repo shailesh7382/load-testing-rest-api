@@ -1,0 +1,989 @@
+openapi: 3.0.3
+info:
+  title: FX Pricing & Booking REST API
+  description: |
+    A comprehensive REST API for pricing (quotes) and booking (trades) of FX trades.
+    Supports extensive attributes for both quote and trade entities with in-memory H2 database.
+  version: 1.0.0
+  contact:
+    name: API Support
+  license:
+    name: MIT License
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+tags:
+  - name: Quotes
+    description: Operations related to FX quotes and pricing
+  - name: Trades
+    description: Operations related to FX trade booking and management
+
+paths:
+  /api/quotes:
+    get:
+      tags:
+        - Quotes
+      summary: Get all quotes
+      description: Retrieves a list of all quotes in the system
+      operationId: getAllQuotes
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Quote'
+    post:
+      tags:
+        - Quotes
+      summary: Create a new quote
+      description: Creates a new FX quote
+      operationId: createQuote
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuoteInput'
+            examples:
+              example1:
+                summary: EUR/USD Quote
+                value:
+                  currencyPair: EUR/USD
+                  bid: 1.1234
+                  ask: 1.1240
+                  mid: 1.1237
+                  quoteProvider: ProviderX
+                  quoteTime: "2024-06-01T12:34:56"
+                  venue: VenueA
+                  liquidityProvider: LP1
+                  quoteId: Q12345
+                  tenor: SPOT
+                  settlementType: T+2
+                  quoteStatus: ACTIVE
+                  sourceSystem: SystemA
+                  pricingModel: Model1
+                  priceType: Firm
+                  marketDataSource: MarketX
+                  quoteCondition: Normal
+                  quoteOrigin: Internal
+                  quoteType: Indicative
+                  quoteLevel: Level1
+                  quoteSide: Buy
+                  quoteChannel: API
+                  quoteVersion: "1"
+                  quoteReference: Ref123
+                  quoteComment: Sample quote
+      responses:
+        '200':
+          description: Quote created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quote'
+
+  /api/quotes/{id}:
+    get:
+      tags:
+        - Quotes
+      summary: Get quote by ID
+      description: Retrieves a specific quote by its database ID
+      operationId: getQuoteById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Quote database ID
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation (returns null if quote not found)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quote'
+    put:
+      tags:
+        - Quotes
+      summary: Update an existing quote
+      description: Updates an existing quote by ID
+      operationId: updateQuote
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Quote database ID
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuoteInput'
+      responses:
+        '200':
+          description: Quote updated successfully (returns null if quote not found)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quote'
+    delete:
+      tags:
+        - Quotes
+      summary: Delete a quote
+      description: Deletes a quote by ID
+      operationId: deleteQuote
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Quote database ID
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Quote deleted successfully (or silently ignored if not found)
+
+  /api/quotes/currency/{currencyPair}:
+    get:
+      tags:
+        - Quotes
+      summary: Get quotes by currency pair
+      description: Retrieves all quotes for a specific currency pair
+      operationId: getQuotesByCurrencyPair
+      parameters:
+        - name: currencyPair
+          in: path
+          required: true
+          description: Currency pair (e.g., EUR/USD, GBP/USD)
+          schema:
+            type: string
+          example: EUR/USD
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Quote'
+
+  /api/quotes/status/{status}:
+    get:
+      tags:
+        - Quotes
+      summary: Get quotes by status
+      description: Retrieves all quotes with a specific status
+      operationId: getQuotesByStatus
+      parameters:
+        - name: status
+          in: path
+          required: true
+          description: Quote status
+          schema:
+            type: string
+          example: ACTIVE
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Quote'
+
+  /api/quotes/search:
+    get:
+      tags:
+        - Quotes
+      summary: Search quotes
+      description: Search quotes with optional filters for currency pair and status
+      operationId: searchQuotes
+      parameters:
+        - name: currencyPair
+          in: query
+          required: false
+          description: Filter by currency pair
+          schema:
+            type: string
+          example: EUR/USD
+        - name: status
+          in: query
+          required: false
+          description: Filter by status
+          schema:
+            type: string
+          example: ACTIVE
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Quote'
+
+  /api/quotes/count:
+    get:
+      tags:
+        - Quotes
+      summary: Get quote count
+      description: Returns the total number of quotes in the system
+      operationId: getQuoteCount
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int64
+              example: 42
+
+  /api/quotes/rfq:
+    post:
+      tags:
+        - Quotes
+      summary: Request for Quote (RFQ)
+      description: |
+        Submit a request for quote with simulated pricing. 
+        The system will generate a randomized quote based on the request.
+        Simulates a delay of approximately 200ms (150-249ms).
+      operationId: requestForQuote
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RFQRequest'
+            examples:
+              example1:
+                summary: EUR/USD RFQ
+                value:
+                  currencyPair: EUR/USD
+                  tenor: SPOT
+      responses:
+        '200':
+          description: Quote generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quote'
+
+  /api/trades:
+    get:
+      tags:
+        - Trades
+      summary: Get all trades
+      description: Retrieves a list of all trades in the system
+      operationId: getAllTrades
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Trade'
+    post:
+      tags:
+        - Trades
+      summary: Book a new trade
+      description: Creates a new FX trade. Validates quoteId if provided.
+      operationId: createTrade
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TradeInput'
+            examples:
+              example1:
+                summary: EUR/USD Trade
+                value:
+                  tradeId: T12345
+                  currencyPair: EUR/USD
+                  notional: 1000000
+                  direction: BUY
+                  price: 1.1237
+                  counterparty: BankA
+                  tradeDateTime: "2024-06-01T12:35:00"
+                  trader: Trader1
+                  book: BookA
+                  status: CONFIRMED
+                  settlementType: T+2
+                  settlementDate: "2024-06-03"
+                  tradeType: SPOT
+                  executionVenue: VenueA
+                  sourceSystem: SystemA
+                  tradeReference: RefT123
+                  tradeComment: Sample trade
+                  tradeVersion: "1"
+                  tradeChannel: API
+                  tradeStrategy: Strategy1
+                  tradeDesk: Desk1
+                  tradeOrigin: Internal
+                  tradeLevel: Level1
+                  tradeSide: Buy
+                  tradeCondition: Normal
+                  tradeCategory: Category1
+                  tradeSubType: SubTypeA
+                  tradeBookType: BookTypeA
+                  quoteId: Q12345
+      responses:
+        '200':
+          description: Trade created successfully, or error response if validation fails
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Trade'
+                  - $ref: '#/components/schemas/ErrorResponse'
+
+  /api/trades/{id}:
+    get:
+      tags:
+        - Trades
+      summary: Get trade by ID
+      description: Retrieves a specific trade by its database ID
+      operationId: getTradeById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Trade database ID
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation (returns null if trade not found)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trade'
+    put:
+      tags:
+        - Trades
+      summary: Update an existing trade
+      description: Updates an existing trade by ID
+      operationId: updateTrade
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Trade database ID
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TradeInput'
+      responses:
+        '200':
+          description: Trade updated successfully (returns null if trade not found)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trade'
+    delete:
+      tags:
+        - Trades
+      summary: Delete a trade
+      description: Deletes a trade by ID
+      operationId: deleteTrade
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Trade database ID
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Trade deleted successfully (or silently ignored if not found)
+
+  /api/trades/currency/{currencyPair}:
+    get:
+      tags:
+        - Trades
+      summary: Get trades by currency pair
+      description: Retrieves all trades for a specific currency pair
+      operationId: getTradesByCurrencyPair
+      parameters:
+        - name: currencyPair
+          in: path
+          required: true
+          description: Currency pair (e.g., EUR/USD, GBP/USD)
+          schema:
+            type: string
+          example: EUR/USD
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Trade'
+
+  /api/trades/status/{status}:
+    get:
+      tags:
+        - Trades
+      summary: Get trades by status
+      description: Retrieves all trades with a specific status
+      operationId: getTradesByStatus
+      parameters:
+        - name: status
+          in: path
+          required: true
+          description: Trade status
+          schema:
+            type: string
+          example: CONFIRMED
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Trade'
+
+  /api/trades/search:
+    get:
+      tags:
+        - Trades
+      summary: Search trades
+      description: Search trades with optional filters for currency pair and status
+      operationId: searchTrades
+      parameters:
+        - name: currencyPair
+          in: query
+          required: false
+          description: Filter by currency pair
+          schema:
+            type: string
+          example: EUR/USD
+        - name: status
+          in: query
+          required: false
+          description: Filter by status
+          schema:
+            type: string
+          example: CONFIRMED
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Trade'
+
+  /api/trades/count:
+    get:
+      tags:
+        - Trades
+      summary: Get trade count
+      description: Returns the total number of trades in the system
+      operationId: getTradeCount
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int64
+              example: 42
+
+  /api/trades/volume/{currencyPair}:
+    get:
+      tags:
+        - Trades
+      summary: Get trade volume by currency pair
+      description: Returns the total trade volume (sum of notionals) for a specific currency pair
+      operationId: getTradeVolumeByCurrencyPair
+      parameters:
+        - name: currencyPair
+          in: path
+          required: true
+          description: Currency pair (e.g., EUR/USD, GBP/USD)
+          schema:
+            type: string
+          example: EUR/USD
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: number
+                format: double
+              example: 5000000.00
+
+components:
+  schemas:
+    Quote:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Database-generated unique identifier
+          example: 1
+        currencyPair:
+          type: string
+          description: Currency pair (e.g., EUR/USD)
+          example: EUR/USD
+        bid:
+          type: number
+          format: double
+          description: Bid price
+          example: 1.1234
+        ask:
+          type: number
+          format: double
+          description: Ask price
+          example: 1.1240
+        mid:
+          type: number
+          format: double
+          description: Mid price
+          example: 1.1237
+        quoteProvider:
+          type: string
+          description: Quote provider name
+          example: ProviderX
+        quoteTime:
+          type: string
+          format: date-time
+          description: Timestamp when the quote was generated
+          example: "2024-06-01T12:34:56"
+        venue:
+          type: string
+          description: Trading venue
+          example: VenueA
+        liquidityProvider:
+          type: string
+          description: Liquidity provider
+          example: LP1
+        quoteId:
+          type: string
+          description: Business quote identifier
+          example: Q12345
+        tenor:
+          type: string
+          description: Tenor (e.g., SPOT, 1M, 3M)
+          example: SPOT
+        settlementType:
+          type: string
+          description: Settlement type
+          example: T+2
+        quoteStatus:
+          type: string
+          description: Quote status
+          example: ACTIVE
+        sourceSystem:
+          type: string
+          description: Source system
+          example: SystemA
+        pricingModel:
+          type: string
+          description: Pricing model used
+          example: Model1
+        priceType:
+          type: string
+          description: Price type (Firm, Indicative)
+          example: Firm
+        marketDataSource:
+          type: string
+          description: Market data source
+          example: MarketX
+        quoteCondition:
+          type: string
+          description: Quote condition
+          example: Normal
+        quoteOrigin:
+          type: string
+          description: Quote origin
+          example: Internal
+        quoteType:
+          type: string
+          description: Quote type
+          example: Indicative
+        quoteLevel:
+          type: string
+          description: Quote level
+          example: Level1
+        quoteSide:
+          type: string
+          description: Quote side (Buy, Sell)
+          example: Buy
+        quoteChannel:
+          type: string
+          description: Quote channel
+          example: API
+        quoteVersion:
+          type: string
+          description: Quote version
+          example: "1"
+        quoteReference:
+          type: string
+          description: Quote reference
+          example: Ref123
+        quoteComment:
+          type: string
+          description: Additional comments
+          example: Sample quote
+
+    QuoteInput:
+      type: object
+      properties:
+        currencyPair:
+          type: string
+          example: EUR/USD
+        bid:
+          type: number
+          format: double
+          example: 1.1234
+        ask:
+          type: number
+          format: double
+          example: 1.1240
+        mid:
+          type: number
+          format: double
+          example: 1.1237
+        quoteProvider:
+          type: string
+          example: ProviderX
+        quoteTime:
+          type: string
+          format: date-time
+          example: "2024-06-01T12:34:56"
+        venue:
+          type: string
+          example: VenueA
+        liquidityProvider:
+          type: string
+          example: LP1
+        quoteId:
+          type: string
+          example: Q12345
+        tenor:
+          type: string
+          example: SPOT
+        settlementType:
+          type: string
+          example: T+2
+        quoteStatus:
+          type: string
+          example: ACTIVE
+        sourceSystem:
+          type: string
+          example: SystemA
+        pricingModel:
+          type: string
+          example: Model1
+        priceType:
+          type: string
+          example: Firm
+        marketDataSource:
+          type: string
+          example: MarketX
+        quoteCondition:
+          type: string
+          example: Normal
+        quoteOrigin:
+          type: string
+          example: Internal
+        quoteType:
+          type: string
+          example: Indicative
+        quoteLevel:
+          type: string
+          example: Level1
+        quoteSide:
+          type: string
+          example: Buy
+        quoteChannel:
+          type: string
+          example: API
+        quoteVersion:
+          type: string
+          example: "1"
+        quoteReference:
+          type: string
+          example: Ref123
+        quoteComment:
+          type: string
+          example: Sample quote
+
+    RFQRequest:
+      type: object
+      required:
+        - currencyPair
+      properties:
+        currencyPair:
+          type: string
+          description: Currency pair for the RFQ
+          example: EUR/USD
+        tenor:
+          type: string
+          description: Tenor (optional, defaults to SPOT)
+          example: SPOT
+
+    Trade:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Database-generated unique identifier
+          example: 1
+        tradeId:
+          type: string
+          description: Business trade identifier
+          example: T12345
+        currencyPair:
+          type: string
+          description: Currency pair (e.g., EUR/USD)
+          example: EUR/USD
+        notional:
+          type: number
+          format: double
+          description: Trade notional amount
+          example: 1000000
+        direction:
+          type: string
+          description: Trade direction (BUY, SELL)
+          example: BUY
+        price:
+          type: number
+          format: double
+          description: Execution price
+          example: 1.1237
+        counterparty:
+          type: string
+          description: Counterparty name
+          example: BankA
+        tradeDateTime:
+          type: string
+          format: date-time
+          description: Trade execution timestamp
+          example: "2024-06-01T12:35:00"
+        trader:
+          type: string
+          description: Trader name
+          example: Trader1
+        book:
+          type: string
+          description: Trading book
+          example: BookA
+        status:
+          type: string
+          description: Trade status
+          example: CONFIRMED
+        settlementType:
+          type: string
+          description: Settlement type
+          example: T+2
+        settlementDate:
+          type: string
+          format: date
+          description: Settlement date
+          example: "2024-06-03"
+        tradeType:
+          type: string
+          description: Trade type (SPOT, FORWARD, SWAP)
+          example: SPOT
+        executionVenue:
+          type: string
+          description: Execution venue
+          example: VenueA
+        sourceSystem:
+          type: string
+          description: Source system
+          example: SystemA
+        tradeReference:
+          type: string
+          description: Trade reference
+          example: RefT123
+        tradeComment:
+          type: string
+          description: Additional comments
+          example: Sample trade
+        tradeVersion:
+          type: string
+          description: Trade version
+          example: "1"
+        tradeChannel:
+          type: string
+          description: Trade channel
+          example: API
+        tradeStrategy:
+          type: string
+          description: Trade strategy
+          example: Strategy1
+        tradeDesk:
+          type: string
+          description: Trade desk
+          example: Desk1
+        tradeOrigin:
+          type: string
+          description: Trade origin
+          example: Internal
+        tradeLevel:
+          type: string
+          description: Trade level
+          example: Level1
+        tradeSide:
+          type: string
+          description: Trade side
+          example: Buy
+        tradeCondition:
+          type: string
+          description: Trade condition
+          example: Normal
+        tradeCategory:
+          type: string
+          description: Trade category
+          example: Category1
+        tradeSubType:
+          type: string
+          description: Trade sub-type
+          example: SubTypeA
+        tradeBookType:
+          type: string
+          description: Trade book type
+          example: BookTypeA
+        quoteId:
+          type: string
+          description: Reference to the quote ID used for this trade
+          example: Q12345
+
+    TradeInput:
+      type: object
+      properties:
+        tradeId:
+          type: string
+          example: T12345
+        currencyPair:
+          type: string
+          example: EUR/USD
+        notional:
+          type: number
+          format: double
+          example: 1000000
+        direction:
+          type: string
+          example: BUY
+        price:
+          type: number
+          format: double
+          example: 1.1237
+        counterparty:
+          type: string
+          example: BankA
+        tradeDateTime:
+          type: string
+          format: date-time
+          example: "2024-06-01T12:35:00"
+        trader:
+          type: string
+          example: Trader1
+        book:
+          type: string
+          example: BookA
+        status:
+          type: string
+          example: CONFIRMED
+        settlementType:
+          type: string
+          example: T+2
+        settlementDate:
+          type: string
+          format: date
+          example: "2024-06-03"
+        tradeType:
+          type: string
+          example: SPOT
+        executionVenue:
+          type: string
+          example: VenueA
+        sourceSystem:
+          type: string
+          example: SystemA
+        tradeReference:
+          type: string
+          example: RefT123
+        tradeComment:
+          type: string
+          example: Sample trade
+        tradeVersion:
+          type: string
+          example: "1"
+        tradeChannel:
+          type: string
+          example: API
+        tradeStrategy:
+          type: string
+          example: Strategy1
+        tradeDesk:
+          type: string
+          example: Desk1
+        tradeOrigin:
+          type: string
+          example: Internal
+        tradeLevel:
+          type: string
+          example: Level1
+        tradeSide:
+          type: string
+          example: Buy
+        tradeCondition:
+          type: string
+          example: Normal
+        tradeCategory:
+          type: string
+          example: Category1
+        tradeSubType:
+          type: string
+          example: SubTypeA
+        tradeBookType:
+          type: string
+          example: BookTypeA
+        quoteId:
+          type: string
+          example: Q12345
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: "Invalid quoteId: Q99999"
