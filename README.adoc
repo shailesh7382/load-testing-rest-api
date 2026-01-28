@@ -40,6 +40,12 @@ Password: (leave blank)
 - `GET /api/quotes` — List all quotes
 - `GET /api/quotes/{id}` — Get quote by ID
 - `POST /api/quotes` — Create a new quote
+- `PUT /api/quotes/{id}` — Update an existing quote
+- `DELETE /api/quotes/{id}` — Delete a quote
+- `GET /api/quotes/status/{status}` — Filter quotes by status
+- `GET /api/quotes/count` — Get total quote count
+- `GET /api/quotes/search?currencyPair={pair}&status={status}` — Search quotes with optional filters
+- `POST /api/quotes/rfq` — Request for quote (RFQ) with simulated pricing
 
 Example JSON for creating a quote:
 [source,json]
@@ -78,6 +84,12 @@ Example JSON for creating a quote:
 - `GET /api/trades` — List all trades
 - `GET /api/trades/{id}` — Get trade by ID
 - `POST /api/trades` — Book a new trade
+- `PUT /api/trades/{id}` — Update an existing trade
+- `DELETE /api/trades/{id}` — Delete a trade
+- `GET /api/trades/status/{status}` — Filter trades by status
+- `GET /api/trades/count` — Get total trade count
+- `GET /api/trades/volume/{currencyPair}` — Get total trade volume by currency pair (note: use hyphen instead of slash, e.g., EUR-USD)
+- `GET /api/trades/search?currencyPair={pair}&status={status}` — Search trades with optional filters
 
 Example JSON for booking a trade:
 [source,json]
