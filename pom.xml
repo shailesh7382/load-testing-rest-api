@@ -18,6 +18,9 @@
 
     <modules>
         <module>fx-api</module>
+        <module>fx-api-client</module>
+        <module>fx-api-server-stub</module>
+        <module>fx-api-test</module>
     </modules>
 
     <properties>
