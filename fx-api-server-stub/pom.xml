@@ -14,10 +14,6 @@
     <name>FX API Server Stub</name>
     <description>Server-side stub generation from OpenAPI specification</description>
 
-    <properties>
-        <openapi-generator-version>7.2.0</openapi-generator-version>
-    </properties>
-
     <dependencies>
         <!-- Spring Boot dependencies -->
         <dependency>

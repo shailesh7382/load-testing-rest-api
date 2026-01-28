@@ -5,9 +5,9 @@ This module provides comprehensive API testing and validation using the OpenAPI 
 ## Overview
 
 This module contains:
-- **Contract Tests**: Validate that the API implementation conforms to the OpenAPI specification
+- **Contract Tests**: Validate that the API implementation conforms to expected behavior
 - **Integration Tests**: End-to-end testing of API endpoints
-- **OpenAPI Validation**: Automated validation of requests and responses against the schema
+- **Basic Validation**: Verify correct HTTP responses and data types
 
 ## Test Classes
 
@@ -90,15 +90,13 @@ Tests are skipped by default in the POM configuration because they require the A
 - **REST Assured**: Fluent API for testing REST services
 - **JUnit 5**: Testing framework
 - **AssertJ**: Fluent assertions
-- **Swagger Request Validator**: OpenAPI schema validation
 - **JSON Path**: JSON query and validation
 
 ## Benefits
 
-- **Contract Testing**: Ensures API implementation matches the specification
+- **Contract Testing**: Ensures API implementation behaves as expected
 - **Regression Testing**: Catch breaking changes early
 - **Documentation**: Tests serve as living documentation of API behavior
-- **Validation**: Automated schema validation prevents contract violations
 - **CI/CD Integration**: Can be integrated into continuous integration pipelines
 
 ## Example Output
